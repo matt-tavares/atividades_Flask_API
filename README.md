@@ -8,10 +8,10 @@ Código com exemplo de API para gestão de atividades de pessoas.
 
 Para executar o código siga os seguintes passos:
 
-1 - Faça o clone do repositório:
+1 - Faça o clone do repositório:</br>
 $ git clone https://github.com/matt-tavares/atividades_Flask_API.git
 
-2 - Execute o seguinte comando para instalar as dependências:
+2 - Execute o seguinte comando para instalar as dependências:</br>
 $ pip install -r requirements.txt
 
 3 - Execute o arquivo models.py para que seja criado a banco de dados SQLite
