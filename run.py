@@ -147,11 +147,17 @@ class ListaAtividade(Resource):
         }
         return response, code
 
+class AtividadePessoa(Resource):
+    def get(self, id):
+        atividades = Atividades.query.filter_by(pessoa_id=id)
+        response = [{"id": i.id, "nome": i.nome, "pessoa": i.pessoa.nome, "status": i.status} for i in atividades]
+        return response
 
 api.add_resource(Pessoa, '/pessoa/<string:nome>')
 api.add_resource(ListaPessoas, '/pessoas')
 api.add_resource(Atividade, '/atividade/<string:id>')
 api.add_resource(ListaAtividade, '/atividades')
+api.add_resource(AtividadePessoa, '/atividade/pessoa/<string:id>')
 
 if __name__=='__main__':
     app.run(debug=True)
