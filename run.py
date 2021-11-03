@@ -1,9 +1,29 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from models import Pessoas, Atividades, Usuarios
+from flask_httpauth import HTTPBasicAuth
 
+auth = HTTPBasicAuth()
 app = Flask(__name__)
 api = Api(app)
+
+# USUARIOS = {
+#     'matheus': '123',
+#     'tavares': '321'
+# }
+
+# @auth.verify_password
+# def verificacao(login, senha):
+#     if not (login, senha):
+#         return False
+#     return USUARIOS.get(login) == senha
+
+@auth.verify_password
+def verificacao(login, senha):
+    if not (login, senha):
+        return False
+    return Usuarios.query.filter_by(login=login, senha=senha).first()
+
 
 class Pessoa(Resource):
     # Busca os dados de uma pessoa
@@ -22,6 +42,7 @@ class Pessoa(Resource):
         return response, code
 
     # Altera os dados de uma pessoa
+    @auth.login_required
     def put(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         dados = request.json
@@ -43,6 +64,7 @@ class Pessoa(Resource):
         return response, code
 
     # Exclui os dados de pessoa
+    @auth.login_required
     def delete(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
@@ -60,10 +82,10 @@ class ListaPessoas(Resource):
     def get(self):
         pessoas = Pessoas.query.all()
         response = [{"id": i.id, "nome": i.nome, "idade": i.idade} for i in pessoas]
-
         return response, 200
 
     # Cadastra pessoa
+    @auth.login_required
     def post(self):
         dados = request.json
         pessoa = Pessoas(nome=dados['nome'], idade=dados['idade'])
@@ -94,6 +116,7 @@ class Atividade(Resource):
         return response, code
 
     # Altera os dados de uma atividade
+    @auth.login_required
     def put(self, id):
         atividade = Atividades.query.filter_by(id=id).first()
         dados = request.json
@@ -114,6 +137,7 @@ class Atividade(Resource):
         return response, code
 
     # Exclui uma atividade
+    @auth.login_required
     def delete(self, id):
         atividade = Atividades.query.filter_by(id=id).first()
         try:
@@ -129,22 +153,28 @@ class ListaAtividade(Resource):
     # Busca todas as atividades
     def get(self):
         atividades = Atividades.query.all()
+        code = 200
         response = [{"id": i.id, "nome": i.nome, "pessoa": i.pessoa.nome, "status": i.status} for i in atividades]
-        return response
+        return response, code
 
     # Cadastra uma atividade
+    @auth.login_required
     def post(self):
         dados = request.json
         pessoa = Pessoas.query.filter_by(nome=dados['pessoa']).first()
-        atividade = Atividades(nome=dados['nome'], status="pendente", pessoa=pessoa)
-        atividade.save()
-        code = 200
-        response = {
-            "id": atividade.id,
-            "nome": atividade.nome,
-            "status": atividade.status,
-            "pessoa": atividade.pessoa.nome
-        }
+        try:
+            atividade = Atividades(nome=dados['nome'], status="pendente", pessoa=pessoa)
+            atividade.save()
+            code = 200
+            response = {
+                "id": atividade.id,
+                "nome": atividade.nome,
+                "status": atividade.status,
+                "pessoa": atividade.pessoa.nome
+            }
+        except AttributeError:
+            code = 400
+            response = {"status": "error", "mensangem": "Pessoa informada não encontrada"}
         return response, code
 
 class AtividadePessoa(Resource):
