@@ -21,6 +21,6 @@ $ pip install -r requirements.txt
 
 5 - Execute o arquivo "run.py"
 
-Ao fazer requisições POST, PUT ou DELETE será necessario usar o método de autenticação basic auth.
-username: matheus
+Ao fazer requisições POST, PUT ou DELETE será necessario usar o método de autenticação basic auth.</br>
+username: matheus</br>
 password: 123
